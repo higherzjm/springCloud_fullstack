@@ -1,0 +1,64 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: springboot-main
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/SPRING_DATA
+    username: root
+    password: zjm@cat
+
+
+management:
+  security:
+    enabled: false   #为了端点的测试需要关闭安全认证
+
+#hystrix的全套配置begin-----------------------
+feign:
+  hystrix:
+    enabled: true   #打开hystrix开关
+hystrix:
+  command:
+      #HytrixHelloClient#baseHytrixServer_test1(): #单个接口中的方法的配置
+    default: #全局的配置
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 1500 #设置超时时间1500毫秒
+      circuitBreaker:
+        requestVolumeThreshold: 3 #设置10秒内3次请求
+
+#hystrix的全套配置end-------------------------------------
+
+
+#zuul的全套配置begin-----------------------
+zuul:
+  routes:
+    sourcezjm:   #  sourcezjm(可修改)的url请求都会转发至http://localhost:8082
+      url: http://localhost:8082  #简单路由，可以省略path配置,没有path的话sourcezjm当后缀直接访问
+    zuultest:
+      path: /zuultest/**     # 所有zuultest开头的请求路径都会转发至:springboot-serviceprovider3的服务id
+      serviceId: springboot-serviceprovider3   #服务提供者，ribbon路由,面向服务的路由
+    forwardZuul:
+          path: /forwardZuul/**
+          url: forward:/forwardZuul_test1 #跳转路由 URL参数需要由forward:...构成 访问方式->http://localhost:9000/forwardZuul/**
+
+# 路由的端点访问路径 http://localhost:9000/routes
+
+#zuul的全套配置end-----------------------
+
+#jpa 数据库的配置begin------------------------
+
+
+
+#jpa 数据库的配置end--------------------------
+
+#default:
+  #ribbon:
+    #NFLoadBalancerRuleClassName: org.crazyit.ribbon.RibbonDiyRuleDiyRule  #调用自定义负载均衡器
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
